@@ -8,17 +8,59 @@ from collections import defaultdict
 
 def main():
   reads_fn = sys.argv[1]
-  _k = sys.argv[2]
+  _k = int(sys.argv[2])
 
-  build_debruijn_graph(reads_fn, _k)
+  kmer_freq(reads_fn, _k)
 
   return
 
-def build_debruijn_graph(reads_fn, _k):
+def kmer_freq(reads_fn, _k):
+  kmers = dict()
+  counter = 0
   for record in SeqIO.parse(reads_fn, 'fastq'):
+    print counter
+    counter += 1
     curr_read = record.seq
+    for i in range(len(curr_read) - _k + 1):
+      kmer = curr_read[i : i + _k]
+      if 'N' not in kmer:
+        if 'a' in kmer or 'c' in kmer or 't' in kmer or 'g' in kmer:
+          print kmer
+        if kmer not in kmers:
+          kmers[kmer] = 1
+        else:
+          kmers[kmer] +=1
 
+  for k in kmers:
+    print kmers[k]
   return
+
+class Debruijn_Graph:
+  def __init__(self, reads_fn, _k):
+    # Constructs the de bruijn graph
+    self.nodes = []
+    self.edges = []
+
+    for record in SeqIO.parse(reads_fn, 'fastq'):
+      curr_read = record.seq
+      for i in range(len(curr_read) - _k + 1):
+        kmer = curr_read[i : i + _k]
+        pref = kmer[:-1]
+        suff = kmer[1:]
+
+class Node:
+  # Nodes for the de bruijn graph
+  def __init__(self):
+    self.inc = []
+    self.out = []
+    self.k1mer = ''
+
+class Edge:
+  def __init__(self):
+    self.inc = []
+    self.out = []
+    self.kmer = ''
+
 
 # Initiates program and records total time
 if __name__ == '__main__':
