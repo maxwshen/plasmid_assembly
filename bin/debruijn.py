@@ -3,7 +3,7 @@
 
 import sys, string, datetime, random, copy, os
 import numpy as np
-from Bio import SeqIO
+# from Bio import SeqIO
 from collections import defaultdict
 
 def main():
@@ -16,20 +16,17 @@ def main():
 
 def kmer_freq(reads_fn, _k):
   kmers = dict()
-  counter = 0
-  for record in SeqIO.parse(reads_fn, 'fastq'):
-    print counter
-    counter += 1
-    curr_read = record.seq
-    for i in range(len(curr_read) - _k + 1):
-      kmer = curr_read[i : i + _k]
-      if 'N' not in kmer:
-        if 'a' in kmer or 'c' in kmer or 't' in kmer or 'g' in kmer:
-          print kmer
-        if kmer not in kmers:
-          kmers[kmer] = 1
-        else:
-          kmers[kmer] +=1
+  with open(reads_fn) as f:
+    for i, line in enumerate(f):
+      if i % 4 == 1:
+        curr_read = line.strip()
+        for i in range(len(curr_read) - _k + 1):
+          kmer = curr_read[i : i + _k]
+          if 'N' not in kmer:
+            if kmer not in kmers:
+              kmers[kmer] = 1
+            else:
+              kmers[kmer] +=1
 
   for k in kmers:
     print kmers[k]
@@ -41,12 +38,12 @@ class Debruijn_Graph:
     self.nodes = []
     self.edges = []
 
-    for record in SeqIO.parse(reads_fn, 'fastq'):
-      curr_read = record.seq
-      for i in range(len(curr_read) - _k + 1):
-        kmer = curr_read[i : i + _k]
-        pref = kmer[:-1]
-        suff = kmer[1:]
+    # for record in SeqIO.parse(reads_fn, 'fastq'):
+    #   curr_read = record.seq
+    #   for i in range(len(curr_read) - _k + 1):
+    #     kmer = curr_read[i : i + _k]
+    #     pref = kmer[:-1]
+    #     suff = kmer[1:]
 
 class Node:
   # Nodes for the de bruijn graph
