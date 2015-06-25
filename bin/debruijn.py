@@ -2,18 +2,45 @@
 # 
 
 import sys, string, datetime, random, copy, os
+import read_fasta as rf
 import numpy as np
 # from Bio import SeqIO
 from collections import defaultdict
 
 def main():
   reads_fn = sys.argv[1]
-  _k = int(sys.argv[2])
+  genome_fn = sys.argv[2]
 
-  db = Debruijn_Graph(reads_fn, _k)
+  tag = str(int(random.random() * 10000))
+  print reads_fn, '\n', genome_fn, '\nTag =', tag
 
-  # kmer_freq(reads_fn, _k)
+  # db = Debruijn_Graph(reads_fn, _k)
 
+  h, r = rf.read_fasta(genome_fn)
+  for _k in range(13, 26, 4):
+    print 'Finding coverage of kmers in reads for k = ', str(_k)
+    kmers = kmer_freq(reads_fn, _k)
+
+    print 'Finding coverage of kmers in genomes...'
+    go_fn = 'fq_' + h[0] + '_' + tag + '_' + str(_k) + '.out'
+    find_kmer_freq_inseq(kmers, r[0], _k, go_fn)
+    po_fn = 'fq_' + h[1] +'_' + tag + '_' + str(_k) + '.out'
+    find_kmer_freq_inseq(kmers, r[1], _k, po_fn)
+  
+  return
+
+def find_kmer_freq_inseq(kmers, seq, _k, out_fn):
+  freqs = []
+  for i in range(len(seq) - _k + 1):
+    ck = seq[i : i + _k]
+    if ck in kmers:
+      freqs.append(kmers[ck])
+    else:
+      print 'kmer not found in reads:', ck
+
+  with open(out_fn) as f:
+    for fq in freqs:
+      f.write(str(fq) + '\n')
   return
 
 def kmer_freq(reads_fn, _k):
@@ -29,10 +56,7 @@ def kmer_freq(reads_fn, _k):
               kmers[kmer] = 1
             else:
               kmers[kmer] +=1
-
-  for k in kmers:
-    print kmers[k]
-  return
+  return kmers
 
 class Debruijn_Graph:
   def __init__(self, reads_fn, _k):
